@@ -1,5 +1,6 @@
 // src/WelcomeScreen.js
 import React, { useState } from 'react';
+import './WelcomeScreen.css';
 
 function WelcomeScreen({ onStartGame }) {
   const [firstName, setFirstName] = useState('');
@@ -14,25 +15,36 @@ function WelcomeScreen({ onStartGame }) {
   };
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '20%' }}>
-      <h1>Welcome to the Multiplayer Word Guessing Game!</h1>
-      <p>Please enter your first and last name to start the game.</p>
-      <input
-        type="text"
-        placeholder="First Name"
-        value={firstName}
-        onChange={(e) => setFirstName(e.target.value)}
-      />
-      <br />
-      <input
-        type="text"
-        placeholder="Last Name"
-        value={lastName}
-        onChange={(e) => setLastName(e.target.value)}
-      />
-      <br />
-      <button onClick={handleStartGame}>Start Game</button>
+    <div className="welcome-container">
+      <h1 className="welcome-title">Welcome to the Word Guessing Challenge!</h1>
+      <p className="welcome-subtitle">Enter your name to get started</p>
+      <div className="input-container">
+        <input
+          type="text"
+          placeholder="First Name"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          className="input-field"
+        />
+        <input
+          type="text"
+          placeholder="Last Name"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          className="input-field"
+        />
+      </div>
+      <button className="start-button" onClick={handleStartGame}>
+        Start Game
+      </button>
+      <div className="background-letters">
+          {Array.from('ABCDEFGHIJKLMNOPQRSTUVWXYZ').map((letter, index) => (
+          <span key={index}>{letter}</span>
+            ))}
+      </div>
+
     </div>
+    
   );
 }
 

@@ -42,7 +42,7 @@ function getRandomWord(difficulty) {
 // Function to generate an AI-based hint using Google Generative AI
 async function generateHint(word) {
     try {
-        const genAI = new GoogleGenerativeAI(process.env.API_KEY);  // Make sure API key is set in your environment
+        const genAI = new GoogleGenerativeAI('AIzaSyDlzHn78WLM2qB417ZTm2gGP2R8QIVQ2TA');  // Make sure API key is set in your environment
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const prompt = `Give me a hint for the word '${word}' without revealing the word itself.`;
@@ -56,6 +56,11 @@ async function generateHint(word) {
     }
 }
 
+// Function to generate word with missing letters
+function getWordWithMissingLetters(word) {
+    return word.split('').map(() => '_').join(' ');
+}
+
 io.on('connection', (socket) => {
     console.log('New player connected:', socket.id);
     
@@ -65,7 +70,13 @@ io.on('connection', (socket) => {
     socket.on('chooseDifficulty', async (difficulty) => {
         currentWord = getRandomWord(difficulty);  // Get a word based on difficulty
         currentHint = await generateHint(currentWord);  // Generate an AI-based hint (asynchronous)
-        io.emit('newRound', { wordLength: currentWord.length });
+        
+        // Print the current word to the console
+        console.log(`Current word: ${currentWord}`);
+        
+        // Send the word with missing letters to the client
+        const wordWithMissingLetters = getWordWithMissingLetters(currentWord);
+        io.emit('newRound', { wordWithMissingLetters });
     });
 
     // Handle player guesses
