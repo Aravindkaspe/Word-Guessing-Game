@@ -1,12 +1,13 @@
 // src/App.js
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import io from 'socket.io-client';
 import WelcomeScreen from './WelcomeScreen';
 import GameModeScreen from './GameModeScreen';
-import DifficultyScreen from './DifficultyScreen';  // Import DifficultyScreen component
+import DifficultyScreen from './DifficultyScreen';
+import SinglePlayerGame from './SinglePlayerGame';
 import './App.css';
 
-const socket = io('http://localhost:4000');  // Connect to Node.js backend
+const socket = io('http://localhost:4000');
 
 function App() {
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -23,15 +24,27 @@ function App() {
   const handleSelectMode = (mode) => {
     setGameMode(mode);
     if (mode === 'single') {
-      setDifficulty(''); // Reset difficulty to show difficulty screen for single mode
+      setDifficulty('');
     } else {
-      setIsGameStarted(true); // For multiplayer, start the game directly
+      setIsGameStarted(true);
     }
   };
 
   const handleSelectDifficulty = (level) => {
     setDifficulty(level);
-    setIsGameStarted(true); // Start the game after selecting difficulty
+    setIsGameStarted(true);
+  };
+
+  const handleRepeat = () => {
+    setDifficulty('');
+    setIsGameStarted(false);
+  };
+
+  const handleQuit = () => {
+    setIsNameEntered(false);
+    setGameMode('');
+    setDifficulty('');
+    setIsGameStarted(false);
   };
 
   return (
@@ -47,11 +60,12 @@ function App() {
           )
         )
       ) : (
-        <div>
-          {/* Game component will be here */}
-          <h1>Welcome to the {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} Mode!</h1>
-          <p>Game content for {gameMode} mode and {difficulty} difficulty will go here.</p>
-        </div>
+        <SinglePlayerGame
+          difficulty={difficulty}
+          userName={userName}
+          onRepeat={handleRepeat}
+          onQuit={handleQuit}
+        />
       )}
     </div>
   );

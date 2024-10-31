@@ -1,0 +1,151 @@
+/* SinglePlayerGame.css */
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #1a1a2e;
+    color: #ecf0f1;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .background-letters {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    font-size: 5rem;
+    font-weight: bold;
+    color: rgba(18, 193, 209, 0.05);
+    letter-spacing: 10px;
+    text-transform: uppercase;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    pointer-events: none;
+    user-select: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+  
+  .game-title {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: #07bdeb;
+    text-shadow: 3px 3px #eef6f7;
+    margin-bottom: 0.5rem;
+    z-index: 2;
+  }
+  
+  .score-timer {
+    display: flex;
+    gap: 3rem;
+    margin-bottom: 1.5rem;
+    z-index: 2;
+  }
+  
+  .score, .timer {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #07bdeb;
+  }
+  
+  .welcome-message, .difficulty-level, .round-info {
+    font-size: 1.5rem;
+    color: #bdc3c7;
+    margin-bottom: 1rem;
+    z-index: 2;
+  }
+  
+  .guess-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+  }
+  
+  .displayed-word {
+    font-size: 2rem;
+    color: #f39c12;
+    letter-spacing: 5px;
+    margin-bottom: 1rem;
+  }
+  
+  .guess-input {
+    padding: 0.75rem 1rem;
+    font-size: 1.25rem;
+    margin: 0.5rem 0;
+    width: 80%;
+    max-width: 300px;
+    border-radius: 5px;
+    border: 1px solid #3498db;
+    outline: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ecf0f1;
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .guess-input:focus {
+    box-shadow: 0px 0px 10px #3498db;
+  }
+  
+  .submit-button, .hint-button, .modal-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.25rem;
+    color: #1a1a2e;
+    background-color: #3498db;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  
+  .submit-button:hover, .hint-button:hover, .modal-button:hover {
+    background-color: #2980b9;
+    transform: scale(1.05);
+  }
+  
+  .hint-display {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    color: #bdc3c7;
+  }
+  
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+  }
+  
+  .modal-content {
+    background: #1a1a2e;
+    padding: 2rem;
+    border-radius: 8px;
+    text-align: center;
+    color: #ecf0f1;
+    width: 80%;
+    max-width: 400px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.5);
+  }  
+  /* SinglePlayerGame.css */
+
+.feedback-message {
+    margin-top: 0.75rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #f39c12;
+    z-index: 2;
+  }
+  
