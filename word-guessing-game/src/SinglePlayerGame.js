@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { generate } from 'random-words'; // Import the generate function
+import axios from 'axios';
+import { generate } from 'random-words';
 import './SinglePlayerGame.css';
 
 function SinglePlayerGame({ difficulty, userName, onRepeat, onQuit }) {
@@ -27,28 +28,25 @@ function SinglePlayerGame({ difficulty, userName, onRepeat, onQuit }) {
   }, [timer]);
 
   const generateNewWord = () => {
-    // Set the word length based on difficulty
     let wordLength;
     if (difficulty === 'easy') {
-      wordLength = Math.floor(Math.random() * (5 - 3 + 1)) + 3; // Random length between 3 and 5
+      wordLength = Math.floor(Math.random() * (5 - 3 + 1)) + 3;
     } else if (difficulty === 'medium') {
-      wordLength = Math.floor(Math.random() * (8 - 6 + 1)) + 6; // Random length between 6 and 8
+      wordLength = Math.floor(Math.random() * (8 - 6 + 1)) + 6;
     } else {
-      wordLength = Math.floor(Math.random() * (12 - 9 + 1)) + 9; // Random length between 9 and 12
+      wordLength = Math.floor(Math.random() * (12 - 9 + 1)) + 9;
     }
 
-    // Generate a word with the specified length
     let word;
     do {
-      word = generate(); // Generate a random word
+      word = generate();
     } while (word.length !== wordLength);
 
     setCurrentWord(word);
     setDisplayedWord(generateMaskedWord(word));
-    setHint(''); // Clear hint for new word
-    setFeedback(''); // Clear feedback for new word
-
-    console.log("Generated Word:", word); // Debugging statement to see the generated word
+    setHint('');
+    setFeedback('');
+    console.log("Generated Word:", word);
   };
 
   const generateMaskedWord = (word) => {
@@ -57,8 +55,19 @@ function SinglePlayerGame({ difficulty, userName, onRepeat, onQuit }) {
     ).join('');
   };
 
-  const requestHint = () => {
-    setHint(`Hint: The word is related to ${difficulty === 'easy' ? 'basic' : 'advanced'} vocabulary.`);
+  const requestHint = async () => {
+    try {
+      // Make a request to the server to generate a hint
+      const response = await axios.get(`http://localhost:4000/generate-hint`, {
+        params: { word: currentWord },
+      });
+
+      const aiHint = response.data.hint;
+      setHint(`Hint: ${aiHint}`);
+    } catch (error) {
+      console.error("Error fetching AI-generated hint:", error);
+      setHint('Hint: Unable to fetch hint at the moment. Try again later.');
+    }
   };
 
   const submitGuess = () => {
@@ -78,7 +87,7 @@ function SinglePlayerGame({ difficulty, userName, onRepeat, onQuit }) {
       setTimer(60);
       generateNewWord();
     } else {
-      setShowModal(true); // Show final score modal after 10 rounds
+      setShowModal(true);
     }
   };
 
@@ -124,14 +133,17 @@ function SinglePlayerGame({ difficulty, userName, onRepeat, onQuit }) {
 
       {showModal && (
         <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Game Over!</h2>
-            <p>Your Final Score: {score}</p>
-            <button className="modal-button" onClick={handleRepeat}>Play Again</button>
-            <button className="modal-button" onClick={onQuit}>Quit</button>
-          </div>
+            <div className="modal-content">
+                <h2>Game Over!</h2>
+                <p>Your Final Score: {score}</p>
+                <div className="modal-button-container">
+                    <button className="modal-button" onClick={handleRepeat}>Play Again</button>
+                    <button className="modal-button" onClick={onQuit}>Quit</button>
+                </div>
+            </div>
         </div>
-      )}
+        )}
+
     </div>
   );
 }
