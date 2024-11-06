@@ -1,7 +1,6 @@
 // src/MultiplayerLobby.js
 import React, { useState } from 'react';
 import CreateLobby from './CreateLobby';
-import JoinLobby from './JoinLobby';
 import './MultiplayerLobby.css';
 
 function MultiplayerLobby({ socket, userName, onRoomJoin }) {
@@ -16,7 +15,6 @@ function MultiplayerLobby({ socket, userName, onRoomJoin }) {
     <div className="lobby-container">
       <h1 className="lobby-title">Multiplayer Lobby</h1>
       <CreateLobby socket={socket} userName={userName} onRoomJoin={onRoomJoin} onRoomCreated={handleRoomCreation} />
-      {!roomCreated && <JoinLobby socket={socket} onRoomJoin={onRoomJoin} />}
 
       {/* Background letters with scrambled effect */}
       <div className="background-letters">

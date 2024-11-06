@@ -1,14 +1,16 @@
 // src/CreateLobby.js
 import React, { useState, useEffect } from 'react';
+import './CreateLobby.css';
 
 function CreateLobby({ socket, userName, onRoomJoin, onRoomCreated }) {
   const [roomCreated, setRoomCreated] = useState(false);
   const [roomID, setRoomID] = useState('');
   const [difficulty, setDifficulty] = useState('');
+  const [joinRoomID, setJoinRoomID] = useState('');
   const [players, setPlayers] = useState([]);
 
   const handleCreateRoom = () => {
-    const uniqueRoomID = `${userName}-${Math.floor(Math.random() * 10000)}`;
+    const uniqueRoomID = `${userName.split(' ').map(n => n.charAt(0)).join('')}-${Math.floor(1000 + Math.random() * 9000)}`;
     setRoomID(uniqueRoomID);
     setRoomCreated(true);
     onRoomCreated();
@@ -16,12 +18,17 @@ function CreateLobby({ socket, userName, onRoomJoin, onRoomCreated }) {
 
   const handleSelectDifficulty = (level) => {
     setDifficulty(level);
-    // Emit 'createRoom' with userName included
     socket.emit('createRoom', { roomID, difficulty: level, userName });
     onRoomJoin(roomID);
   };
 
-  // Listen for new players joining the room
+  const handleJoinRoom = () => {
+    if (joinRoomID.trim() !== '') {
+      socket.emit('joinRoom', { roomID: joinRoomID, userName });
+      onRoomJoin(joinRoomID);
+    }
+  };
+
   useEffect(() => {
     socket.on('playerJoined', ({ players }) => {
       setPlayers(Object.values(players));
@@ -32,7 +39,6 @@ function CreateLobby({ socket, userName, onRoomJoin, onRoomCreated }) {
     };
   }, [socket]);
 
-  // Emit start game event when host clicks start
   const handleStartGame = () => {
     socket.emit('startGame', roomID);
   };
@@ -40,9 +46,24 @@ function CreateLobby({ socket, userName, onRoomJoin, onRoomCreated }) {
   return (
     <div className="create-lobby-container">
       {!roomCreated ? (
-        <button className="create-room-button" onClick={handleCreateRoom}>
-          Create Room
-        </button>
+        <div className="create-join-container">
+          <button className="create-room-button" onClick={handleCreateRoom}>
+            Create Room
+          </button>
+          <p>Or enter a Room ID to join:</p>
+          <div className="room-id-wrapper">
+            <input
+              type="text"
+              placeholder="Enter Room ID"
+              value={joinRoomID}
+              onChange={(e) => setJoinRoomID(e.target.value)}
+              className="room-id-input"
+            />
+            <button className="create-room-button join-room-button" onClick={handleJoinRoom}>
+              Join Room
+            </button>
+          </div>
+        </div>
       ) : !difficulty ? (
         <div>
           <h3>Room ID: {roomID}</h3>
