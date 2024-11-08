@@ -1,6 +1,7 @@
 // MultiplayerGame.js
 import React, { useState, useEffect } from 'react';
 import './MultiplayerGame.css';
+import MultiplayerGameSession from './MultiplayerGameSession';
 
 function MultiplayerGame({ socket, roomName, userName }) {
   const [isGameStarted, setIsGameStarted] = useState(false);
@@ -9,10 +10,12 @@ function MultiplayerGame({ socket, roomName, userName }) {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('');
 
+
   useEffect(() => {
     socket.emit('joinRoom', { roomName, userName });
 
     socket.on('playerJoined', ({ players }) => {
+        console.log("Player list received:", players);
       setPlayers(Object.values(players));
       if (players[socket.id]?.isHost) {
         setIsHost(true);
@@ -46,6 +49,27 @@ function MultiplayerGame({ socket, roomName, userName }) {
     }
   };
 
+  const chatPanel = (
+    <div className="chat-panel">
+      <h2 className="chat-title">Chat Messages</h2>
+      <div className="chat-messages">
+        {messages.map((msg, index) => (
+          <p key={index}><strong>{msg.userName}</strong>: {msg.message}</p>
+        ))}
+      </div>
+      <form onSubmit={handleSendMessage} className="chat-form">
+        <input
+          type="text"
+          placeholder="Type a message..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="chat-input"
+        />
+        <button type="submit" className="send-button">Send</button>
+      </form>
+    </div>
+  );
+
   if (!isGameStarted) {
     return (
       <div className="waiting-room-container">
@@ -76,33 +100,26 @@ function MultiplayerGame({ socket, roomName, userName }) {
             <p className="waiting-message">Waiting for the host to start the game...</p>
           )}
         </div>
-
-        {/* Chat Panel Positioned to the Right */}
-        <div className="chat-panel-container">
-          <h2 className="chat-title">Chat Messages</h2>
-          <div className="chat-messages">
-            {messages.map((msg, index) => (
-              <p key={index}><strong>{msg.userName}</strong>: {msg.message}</p>
-            ))}
-          </div>
-          <form onSubmit={handleSendMessage} className="chat-form">
-            <input
-              type="text"
-              placeholder="Type a message..."
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="chat-input"
-            />
-            <button type="submit" className="send-button">Send</button>
-          </form>
-        </div>
+        {chatPanel}
       </div>
     );
   }
 
   return (
-    <div>
-      <h1>Game Component (Game is Started)</h1>
+    <div className="multiplayer-game-container">
+      {!isGameStarted ? (
+        <div className="waiting-room-container">
+          {/* Scrambled Background Letters */}
+          <div className="background-letters"> {/* Background letter styling here */} </div>
+          <div className="main-content"> {/* Player list and start button */} </div>
+          {chatPanel}
+        </div>
+      ) : (
+        <>
+          <MultiplayerGameSession socket={socket} roomName={roomName} userName={userName} />
+          {chatPanel}
+        </>
+      )}
     </div>
   );
 }

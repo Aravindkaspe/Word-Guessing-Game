@@ -62,43 +62,44 @@ function broadcastAvailableRooms() {
     io.emit('availableRooms', Object.keys(rooms));
 }
 
+
 io.on('connection', (socket) => {
     console.log('A player connected:', socket.id);
 
-    // Send the current list of rooms to the new connection
-    socket.emit('availableRooms', Object.keys(rooms));
-
     socket.on('createRoom', ({ roomID, userName, difficulty }) => {
-        if (!rooms[roomID]) {
-            rooms[roomID] = {
-                players: {},
-                word: generateRandomWord(difficulty),
-                difficulty,
-                host: socket.id
-            };
-
-            rooms[roomID].players[socket.id] = { score: 0, name: userName, isHost: true };
-            console.log(`Room created with ID: ${roomID}`);
-            console.log(`Assigned host: ${userName} (ID: ${socket.id}), Host flag: true`);
-
-            socket.join(roomID);
-            broadcastAvailableRooms(); // Update all clients with the new room list
-
-            io.in(roomID).emit('playerJoined', { players: rooms[roomID].players });
-        }
+        rooms[roomID] = {
+            players: {},
+            word: getRandomWord(difficulty),
+            difficulty,
+            host: socket.id,
+        };
+        rooms[roomID].players[socket.id] = { score: 0, name: userName, isHost: true };
+        socket.join(roomID);
+        console.log(`Room created with ID: ${roomID}, Host: ${userName}`);
+        io.in(roomID).emit('playerJoined', { players: rooms[roomID].players });
     });
 
     socket.on('joinRoom', ({ roomID, userName }) => {
         if (rooms[roomID]) {
             socket.join(roomID);
             rooms[roomID].players[socket.id] = { score: 0, name: userName, isHost: false };
-
-            console.log(`Player joined room ${roomID}: ${userName} (ID: ${socket.id})`);
+            console.log(`${userName} joined room ${roomID}`);
             io.in(roomID).emit('playerJoined', { players: rooms[roomID].players });
-            broadcastAvailableRooms(); // Update all clients with the new room list
         } else {
             socket.emit('errorMessage', 'Room does not exist.');
         }
+    });
+
+    socket.on('startGame', (roomID) => {
+        if (rooms[roomID] && rooms[roomID].host === socket.id) {
+            io.in(roomID).emit('gameStarted', { word: rooms[roomID].word });
+            console.log(`Game started in room ${roomID}`);
+        }
+    });
+
+    socket.on('chatMessage', ({ roomID, userName, message }) => {
+        console.log(`Message in room ${roomID} from ${userName}: ${message}`);
+        io.to(roomID).emit('receiveMessage', { userName, message });
     });
 
     socket.on('disconnect', () => {
