@@ -72,7 +72,7 @@ io.on('connection', (socket) => {
         if (!rooms[roomID]) {
             rooms[roomID] = {
                 players: {},
-                word: generateRandomWord(difficulty),
+                word: getRandomWord(difficulty),
                 difficulty,
                 host: socket.id
             };
@@ -118,6 +118,10 @@ io.on('connection', (socket) => {
                 break;
             }
         }
+    });
+
+    socket.on('chatMessage', ({ roomID, userName, message }) => {
+        io.in(roomID).emit('receiveMessage', { userName, message });
     });
 });
 

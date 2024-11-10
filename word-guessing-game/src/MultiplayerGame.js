@@ -19,12 +19,10 @@ function MultiplayerGame({ socket, roomName, userName }) {
       }
     });
 
-    socket.on('gameStarted', () => {
-      setIsGameStarted(true);
-    });
+    socket.on('gameStarted', () => setIsGameStarted(true));
 
-    socket.on('receiveMessage', ({ userName, message }) => {
-      setMessages((prevMessages) => [...prevMessages, { userName, message }]);
+    socket.on('receiveMessage', ({ userName: senderName, message: receivedMessage }) => {
+      setMessages(prevMessages => [...prevMessages, { userName: senderName, message: receivedMessage }]);
     });
 
     return () => {
@@ -34,22 +32,19 @@ function MultiplayerGame({ socket, roomName, userName }) {
     };
   }, [socket, roomName, userName]);
 
-  const handleStartGame = () => {
-    socket.emit('startGame', roomName);
-  };
+  const handleStartGame = () => socket.emit('startGame', roomName);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (message.trim()) {
       socket.emit('chatMessage', { roomID: roomName, userName, message });
-      setMessage('');
+      setMessage(''); // Clear the input field without adding to messages
     }
   };
 
   if (!isGameStarted) {
     return (
       <div className="waiting-room-container">
-        {/* Scrambled Background Letters */}
         <div className="background-letters">
           {Array.from({ length: 64 }).map((_, index) => (
             <span key={index} style={{ '--random-rotation': Math.random() * 2 - 1 }}>
@@ -57,8 +52,6 @@ function MultiplayerGame({ socket, roomName, userName }) {
             </span>
           ))}
         </div>
-
-        {/* Main Content in the Center */}
         <div className="main-content">
           <h1 className="waiting-room-title">Waiting Room</h1>
           <p className="room-info">Room ID: {roomName}</p>
@@ -66,7 +59,7 @@ function MultiplayerGame({ socket, roomName, userName }) {
           <ul className="player-list">
             {players.map((player, index) => (
               <li key={index} className="player-item">
-                {player.name ? player.name : "Unknown"} - Points: {player.score}
+                {player.name} - Points: {player.score}
               </li>
             ))}
           </ul>
@@ -76,13 +69,16 @@ function MultiplayerGame({ socket, roomName, userName }) {
             <p className="waiting-message">Waiting for the host to start the game...</p>
           )}
         </div>
-
-        {/* Chat Panel Positioned to the Right */}
         <div className="chat-panel-container">
           <h2 className="chat-title">Chat Messages</h2>
           <div className="chat-messages">
             {messages.map((msg, index) => (
-              <p key={index}><strong>{msg.userName}</strong>: {msg.message}</p>
+              <p
+                key={index}
+                className={`chat-message ${msg.userName === userName ? 'user-message' : 'other-message'}`}
+              >
+                <strong>{msg.userName}</strong>: {msg.message}
+              </p>
             ))}
           </div>
           <form onSubmit={handleSendMessage} className="chat-form">
