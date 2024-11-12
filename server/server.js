@@ -74,7 +74,8 @@ io.on('connection', (socket) => {
                 players: {},
                 word: getRandomWord(difficulty),
                 difficulty,
-                host: socket.id
+                host: socket.id,
+                roundNumber: 0
             };
 
             rooms[roomID].players[socket.id] = { score: 0, name: userName, isHost: true };
@@ -123,6 +124,64 @@ io.on('connection', (socket) => {
     socket.on('chatMessage', ({ roomID, userName, message }) => {
         io.in(roomID).emit('receiveMessage', { userName, message });
     });
+
+    socket.on('startGame', (roomID) => {
+        if (rooms[roomID] && rooms[roomID].host === socket.id) {
+            const difficulty = rooms[roomID].difficulty;
+            rooms[roomID].roundNumber = 0;
+            io.in(roomID).emit('gameStarted', { difficulty });
+            startRound(roomID); // Start the first round
+            console.log(`Game started in room ${roomID}. Difficulty: ${difficulty}, Initial Round: ${rooms[roomID].roundNumber}`);
+        }
+    });
+
+    socket.on('timeOut', ({ roomID }) => {
+        startRound(roomID);
+    });
+
+
+    socket.on('submitGuess', ({ roomID, userName, guess }) => {
+        const room = rooms[roomID];
+        if (room && room.players) {
+            const currentWord = room.currentWord;
+            const player = Object.values(room.players).find(player => player.name === userName);
+
+            if (player && currentWord && guess.toLowerCase() === currentWord.toLowerCase()) {
+            // Increase the score of the player who guessed correctly
+                player.score += 1;
+
+                console.log(`Score updated for ${userName}. Current scores:`);
+                console.log(
+                Object.values(room.players).map(player => ({
+                    name: player.name,
+                    score: player.score
+                }))
+                );
+
+            // Emit the updated scores to all players in the room
+                const updatedScores = Object.values(room.players).map(player => ({
+                    name: player.name,
+                    score: player.score
+        }));
+            io.in(roomID).emit('scoreUpdate', { updatedScores });
+            io.in(roomID).emit('guessResult', { userName, correct: true });
+            startRound(roomID); // Start next round
+            console.log(`Correct guess by ${userName} in room ${roomID}. Starting next round.`);
+            }
+        } else {
+            socket.emit('guessResult', { userName, correct: false });
+            console.log(`Incorrect guess by ${userName} in room ${roomID}.`);
+
+        }
+    });
+
+    socket.on('requestHint', ({ roomID, userName }) => {
+        const word = rooms[roomID]?.currentWord;
+        if (word) {
+            const hint = `The word starts with "${word.charAt(0)}" and is ${word.length} letters long.`;
+            io.to(socket.id).emit('receiveHint', hint);
+        }
+    });
 });
 
 function getRandomWord(difficulty) {
@@ -138,4 +197,35 @@ function getRandomWord(difficulty) {
     }
     const filteredWords = words.filter(word => word.length === wordLength);
     return filteredWords[Math.floor(Math.random() * filteredWords.length)];
+}
+
+function startRound(roomID) {
+    if (rooms[roomID]) {
+
+        if (rooms[roomID].roundNumber >= 10) {
+            const finalScores = Object.values(rooms[roomID].players).map(player => ({
+                name: player.name,
+                score: player.score
+            }));
+            io.in(roomID).emit('gameOver', { scores: finalScores });
+            console.log(`Game over in room ${roomID}. Final scores:`, finalScores);
+            return;
+        }
+
+        const difficulty = rooms[roomID].difficulty;
+        const word = getRandomWord(difficulty);
+        rooms[roomID].currentWord = word;
+        rooms[roomID].roundNumber += 1;
+        // Send masked word to clients, masking some characters
+        const maskedWord = maskWord(word);
+        io.in(roomID).emit('newRound', { maskedWord, roundNumber: rooms[roomID].roundNumber });
+        console.log(`Starting new round in room ${roomID}. Word: ${word}, Masked Word: ${maskedWord}, round: ${rooms[roomID].roundNumber}`);
+    }
+}
+
+function maskWord(word) {
+    return word
+        .split('')
+        .map(char => (Math.random() > 0.5 ? '_' : char))
+        .join('');
 }
