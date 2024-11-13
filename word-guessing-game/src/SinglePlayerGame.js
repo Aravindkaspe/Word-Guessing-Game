@@ -50,10 +50,12 @@ function SinglePlayerGame({ difficulty, userName, onRepeat, onQuit }) {
   };
 
   const generateMaskedWord = (word) => {
-    return word.split('').map((char) =>
-      Math.random() > 0.5 ? '_' : char
-    ).join('');
-  };
+    const vowels = ['a', 'e', 'i', 'o', 'u'];
+    return word
+        .split('')
+        .map(char => (vowels.includes(char.toLowerCase()) ? char : '_'))
+        .join('');
+};
 
   const requestHint = async () => {
     try {

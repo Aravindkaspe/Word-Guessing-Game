@@ -78,7 +78,7 @@ function App() {
           onQuit={handleQuit}
         />
       ) : (
-        <MultiplayerGame socket={socket} roomName={roomName} userName={userName} />
+        <MultiplayerGame socket={socket} roomName={roomName} userName={userName} onQuit={handleQuit}/>
       )}
     </div>
   );

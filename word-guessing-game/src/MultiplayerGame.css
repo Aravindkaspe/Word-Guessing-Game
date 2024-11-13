@@ -415,3 +415,83 @@
   color: #1a1a2e;
   cursor: pointer;
 }
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* Modal Content */
+.modal-content {
+  background: #fff;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Title and List */
+.modal-content h2 {
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  color: #1a1a2e;
+}
+
+.modal-content p {
+  font-size: 1.25rem;
+  color: #333;
+}
+
+/* Score List */
+.score-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0;
+}
+
+.score-item {
+  font-size: 1.25rem;
+  color: #1a1a2e;
+  margin: 0.5rem 0;
+}
+
+/* Button Container and Buttons */
+.modal-button-container {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.modal-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.25rem;
+  color: #1a1a2e;
+  background-color: #3498db;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.modal-button:hover {
+  background-color: #2980b9;
+  transform: scale(1.05);
+}
+
+.hint-text {
+  font-size: 1.2rem;
+  margin-top: 1rem;
+  font-style: italic;
+}

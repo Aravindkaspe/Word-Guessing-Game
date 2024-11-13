@@ -202,7 +202,7 @@ function getRandomWord(difficulty) {
 function startRound(roomID) {
     if (rooms[roomID]) {
 
-        if (rooms[roomID].roundNumber >= 10) {
+        if (rooms[roomID].roundNumber >= 3) {
             const finalScores = Object.values(rooms[roomID].players).map(player => ({
                 name: player.name,
                 score: player.score
@@ -218,14 +218,15 @@ function startRound(roomID) {
         rooms[roomID].roundNumber += 1;
         // Send masked word to clients, masking some characters
         const maskedWord = maskWord(word);
-        io.in(roomID).emit('newRound', { maskedWord, roundNumber: rooms[roomID].roundNumber });
+        io.in(roomID).emit('newRound', {maskedWord, roundNumber: rooms[roomID].roundNumber, word});
         console.log(`Starting new round in room ${roomID}. Word: ${word}, Masked Word: ${maskedWord}, round: ${rooms[roomID].roundNumber}`);
     }
 }
 
 function maskWord(word) {
+    const vowels = ['a', 'e', 'i', 'o', 'u'];
     return word
         .split('')
-        .map(char => (Math.random() > 0.5 ? '_' : char))
+        .map(char => (vowels.includes(char.toLowerCase()) ? char : '_'))
         .join('');
 }

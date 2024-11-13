@@ -1,8 +1,8 @@
-// MultiplayerGame.js
 import React, { useState, useEffect } from 'react';
 import './MultiplayerGame.css';
+import axios from 'axios';
 
-function MultiplayerGame({ socket, roomName, userName }) {
+function MultiplayerGame({ socket, roomName, userName, onQuit }) {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [players, setPlayers] = useState([]);
   const [isHost, setIsHost] = useState(false);
@@ -11,14 +11,16 @@ function MultiplayerGame({ socket, roomName, userName }) {
   const [maskedWord, setMaskedWord] = useState('');
   const [guess, setGuess] = useState('');
   const [feedback, setFeedback] = useState('');
-  const [score, setScore] = useState(0); // Initialize score state
-  const [timer, setTimer] = useState(60); // Initialize timer state
-  const [difficulty, setDifficulty] = useState(); // Example difficulty level
+  const [score, setScore] = useState(0);
+  const [timer, setTimer] = useState(60);
+  const [difficulty, setDifficulty] = useState();
   const [roundNumber, setRoundNumber] = useState(1);
   const [scores, setScores] = useState([]);
   const [gameOver, setGameOver] = useState(false);
   const [hint, setHint] = useState('');
-
+  const [showModal, setShowModal] = useState(false);
+  const [currentWord, setCurrentWord] = useState('');
+const [showGameOverScreen, setShowGameOverScreen] = useState(false);
 
 
   useEffect(() => {
@@ -32,25 +34,28 @@ function MultiplayerGame({ socket, roomName, userName }) {
     });
 
     socket.on('gameStarted', ({ difficulty }) => {
-      setIsGameStarted(true)
-      setTimer(60)
+      setIsGameStarted(true);
+      setTimer(60);
       setDifficulty(difficulty);
       setRoundNumber(1);
       setGameOver(false);
       setScores([]);
+      setShowModal(false);
       console.log(`Game started. Difficulty: ${difficulty}, Initial Round: 1`);
-  });
+    });
 
     socket.on('receiveMessage', ({ userName: senderName, message: receivedMessage }) => {
       setMessages(prevMessages => [...prevMessages, { userName: senderName, message: receivedMessage }]);
     });
 
-    socket.on('newRound', ({ maskedWord, roundNumber }) => {
+    socket.on('newRound', ({ maskedWord, roundNumber, word }) => {
       setMaskedWord(maskedWord);
       setFeedback('');
       setTimer(60);
       setRoundNumber(roundNumber);
-      console.log(`New round started. Round: ${roundNumber}, Masked Word: ${maskedWord}`);
+      setHint('');
+      setCurrentWord(word);
+      console.log(`New round started with word: ${word}, Round: ${roundNumber}, Masked Word: ${maskedWord}`);
     });
 
     socket.on('guessResult', ({ userName: senderName, correct }) => {
@@ -58,21 +63,18 @@ function MultiplayerGame({ socket, roomName, userName }) {
     });
 
     socket.on('scoreUpdate', ({ updatedScores }) => {
-      setScores(updatedScores); // Update scores for all players
-      console.log('Score update received:', updatedScores);
-    });
-
-    socket.on('scoreUpdate', ({ updatedScores }) => {
       setScores(updatedScores);
       const playerScore = updatedScores.find(player => player.name === userName)?.score || 0;
-      setScore(playerScore); // Update the score for the current player
+      setScore(playerScore);
       console.log('Score update received:', updatedScores);
     });
 
     socket.on('gameOver', ({ scores }) => {
+      console.log("Game Over event received");
       setGameOver(true);
       setScores(scores);
-      setIsGameStarted(false); // Stop the game
+      setIsGameStarted(true);
+      setShowGameOverScreen(true);
       console.log('Game over. Final scores:', scores);
     });
 
@@ -93,6 +95,15 @@ function MultiplayerGame({ socket, roomName, userName }) {
     };
   }, [socket, roomName, userName]);
 
+  // Separate useEffect to handle gameOver and showModal update
+  useEffect(() => {
+    if (gameOver) {
+      setShowModal(true);
+      console.log("showModal set to true:", showModal);
+    }
+  }, [gameOver]);
+
+
   useEffect(() => {
     let countdown;
     if (isGameStarted && timer > 0) {
@@ -103,7 +114,7 @@ function MultiplayerGame({ socket, roomName, userName }) {
       handleTimeOut();
     }
 
-    return () => clearInterval(countdown); // Clear the interval when component unmounts or timer resets
+    return () => clearInterval(countdown);
   }, [isGameStarted, timer]);
 
   const handleStartGame = () => socket.emit('startGame', roomName);
@@ -112,7 +123,7 @@ function MultiplayerGame({ socket, roomName, userName }) {
     e.preventDefault();
     if (message.trim()) {
       socket.emit('chatMessage', { roomID: roomName, userName, message });
-      setMessage(''); // Clear the input field without adding to messages
+      setMessage('');
     }
   };
 
@@ -124,32 +135,43 @@ function MultiplayerGame({ socket, roomName, userName }) {
     }
   };
 
-  const handleRequestHint = () => {
-    socket.emit('requestHint', { roomID: roomName, userName });
+  const requestHint = async () => {
+    try {
+      const response = await axios.get(`http://localhost:4000/generate-hint`, {
+        params: { word: currentWord },
+      });
+      const aiHint = response.data.hint;
+      setHint(`Hint: ${aiHint}`);
+    } catch (error) {
+      console.error("Error fetching AI-generated hint:", error);
+      setHint('Hint: Unable to fetch hint at the moment. Try again later.');
+    }
   };
 
   const handleTimeOut = () => {
     setFeedback("Time's up! Starting the next round...");
     socket.emit('timeOut', { roomID: roomName, userName });
-    setTimeout(() => startNewRound()); // Start next round after a short delay
+    setTimeout(() => startNewRound());
   };
 
   const startNewRound = () => {
     socket.emit('startNewRound', roomName);
   };
 
-  const handleRetry = () => {
-    socket.emit('startGame', roomName); // Restart the game
-    setScores([]); // Reset the local score
+  const handleRepeat = () => {
+    setShowGameOverScreen(false);
+    setShowModal(false);
+    socket.emit('startGame', roomName);
+    setScores([]);
   };
 
   const handleQuit = () => {
-    // Redirect or show a message (depending on the app structure)
-    console.log('Player has chosen to quit.');
+    if (onQuit) {
+      onQuit();
+    }
   };
 
-
-  if (!isGameStarted) {
+  if (!isGameStarted && !showGameOverScreen) {
     return (
       <div className="waiting-room-container">
         <div className="background-letters">
@@ -180,10 +202,7 @@ function MultiplayerGame({ socket, roomName, userName }) {
           <h2 className="chat-title">Chat Messages</h2>
           <div className="chat-messages">
             {messages.map((msg, index) => (
-              <p
-                key={index}
-                className={`chat-message ${msg.userName === userName ? 'user-message' : 'other-message'}`}
-              >
+              <p key={index} className={`chat-message ${msg.userName === userName ? 'user-message' : 'other-message'}`}>
                 <strong>{msg.userName}</strong>: {msg.message}
               </p>
             ))}
@@ -206,20 +225,26 @@ function MultiplayerGame({ socket, roomName, userName }) {
   return (
     <div className="game-container">
       <h1 className="game-title">Word Guessing Challenge</h1>
-      {gameOver ? (
-        <div className="game-over">
-          <h2>Game Over</h2>
-          <h3>Scores:</h3>
-          <ul>
+      {showModal ? (
+      <div className="modal-overlay">
+        <div className="modal-content">
+          <h2>Game Over!</h2>
+          <p>Final Scores:</p>
+          <ul className="score-list">
             {scores.map((player, index) => (
-              <li key={index}>{player.name}: {player.score}</li>
+              <li key={index} className="score-item">
+                {player.name}: {player.score}
+              </li>
             ))}
           </ul>
-          <button onClick={handleRetry}>Retry</button>
-          <button onClick={handleQuit}>Quit</button>
+          <div className="modal-button-container">
+            <button className="modal-button" onClick={handleRepeat}>Play Again</button>
+            <button className="modal-button" onClick={handleQuit}>Quit</button>
+          </div>
         </div>
-      ) : (
-        <>
+      </div>
+    ) : null}
+
       <div className="score-timer">
         <span>Score: {scores.find((p) => p.name === userName)?.score || 0}</span>
         <span>Time Left: {timer}s</span>
@@ -240,9 +265,9 @@ function MultiplayerGame({ socket, roomName, userName }) {
           />
           <button type="submit" className="submit-button">Submit Guess</button>
         </form>
-        <button className="hint-button" onClick={handleRequestHint}>Request a Hint</button>
+        <button className="hint-button" onClick={requestHint}>Request a Hint</button>
       </div>
-
+      {hint && <p className="hint-text">{hint}</p>}
       <p className="feedback">{feedback}</p>
       <div className="chat-panel-container">
         <h2 className="chat-title">Chat Messages</h2>
@@ -264,8 +289,6 @@ function MultiplayerGame({ socket, roomName, userName }) {
           <button type="submit" className="send-button">Send</button>
         </form>
       </div>
-      </>
-    )}
     </div>
   );
 }
