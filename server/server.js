@@ -129,6 +129,9 @@ io.on('connection', (socket) => {
         if (rooms[roomID] && rooms[roomID].host === socket.id) {
             const difficulty = rooms[roomID].difficulty;
             rooms[roomID].roundNumber = 0;
+            Object.values(rooms[roomID].players).forEach(player => {
+                player.score = 0;
+            });
             io.in(roomID).emit('gameStarted', { difficulty });
             startRound(roomID); // Start the first round
             console.log(`Game started in room ${roomID}. Difficulty: ${difficulty}, Initial Round: ${rooms[roomID].roundNumber}`);

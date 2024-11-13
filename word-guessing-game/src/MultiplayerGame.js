@@ -20,7 +20,8 @@ function MultiplayerGame({ socket, roomName, userName, onQuit }) {
   const [hint, setHint] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [currentWord, setCurrentWord] = useState('');
-const [showGameOverScreen, setShowGameOverScreen] = useState(false);
+  const [showGameOverScreen, setShowGameOverScreen] = useState(false);
+  const [notification, setNotification] = useState('');
 
 
   useEffect(() => {
@@ -117,7 +118,14 @@ const [showGameOverScreen, setShowGameOverScreen] = useState(false);
     return () => clearInterval(countdown);
   }, [isGameStarted, timer]);
 
-  const handleStartGame = () => socket.emit('startGame', roomName);
+  const handleStartGame = () => {
+    if (players.length < 2) {
+      setNotification("Please wait for another player to join before starting the game."); // Notify host to wait
+    } else {
+      setNotification(''); // Clear notification if players are sufficient
+      socket.emit('startGame', roomName);
+    }
+  };
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -161,8 +169,10 @@ const [showGameOverScreen, setShowGameOverScreen] = useState(false);
   const handleRepeat = () => {
     setShowGameOverScreen(false);
     setShowModal(false);
-    socket.emit('startGame', roomName);
+    setIsGameStarted(false);
     setScores([]);
+    socket.emit('joinRoom', { roomName, userName });
+    console.log("Game Repeated")
   };
 
   const handleQuit = () => {
@@ -193,7 +203,10 @@ const [showGameOverScreen, setShowGameOverScreen] = useState(false);
             ))}
           </ul>
           {isHost ? (
+            <>
             <button className="start-game-button" onClick={handleStartGame}>Start Game</button>
+            {notification && <p className="notification">{notification}</p>} {/* Display notification */}
+            </>
           ) : (
             <p className="waiting-message">Waiting for the host to start the game...</p>
           )}
