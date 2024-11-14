@@ -121,6 +121,7 @@ function SinglePlayerGame({ difficulty, userName, onRepeat, onQuit }) {
           type="text"
           value={guess}
           onChange={(e) => setGuess(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && submitGuess()}
           placeholder="Enter your guess"
           className="guess-input"
         />

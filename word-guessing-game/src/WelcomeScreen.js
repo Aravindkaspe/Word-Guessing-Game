@@ -14,6 +14,12 @@ function WelcomeScreen({ onStartGame }) {
     }
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleStartGame();
+    }
+  };
+
   return (
     <div className="welcome-container">
       <h1 className="welcome-title">Welcome to the Word Guessing Challenge!</h1>
@@ -32,6 +38,7 @@ function WelcomeScreen({ onStartGame }) {
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
           className="input-field"
+          onKeyDown={handleKeyDown}
         />
       </div>
       <button className="start-button" onClick={handleStartGame}>

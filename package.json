@@ -1,5 +1,15 @@
 {
-  "dependencies": {
-    "react-router-dom": "^6.28.0"
+  "name": "Word Guessing Game",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && node Server.js",
+    "client": "cd word-guessing-game && npm start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
   }
 }
