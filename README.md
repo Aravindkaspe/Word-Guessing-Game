@@ -7,11 +7,12 @@ The multiplayer mode allows players to create or join game rooms, chat with othe
 Whether you're a casual gamer looking for light entertainment or a competitive player eager to outscore others, the **Word Guessing Game** offers a unique blend of fun and challenge that will keep you coming back for more. Perfect for playing solo or as a group activity, this game is a great way to improve your vocabulary while having a fantastic time!
 
 ## Built With
-* [![HTML5][HTML5-shield]][HTML5-url]
-* [![CSS3][CSS3-shield]][CSS3-url]
-* [![JavaScript][JavaScript-shield]][JavaScript-url]
-* [![Node.js][Node.js-shield]][Node.js-url]
-* [![Express][Express-shield]][Express-url]
-* [![Socket.IO][Socket.IO-shield]][Socket.IO-url]
-*  [ ](https://nodejs.org/)
+
+- [![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
+- [![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+- [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+- [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+- [![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+- [![Socket.IO](https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socketdotio&logoColor=white)](https://socket.io/)
+
 
