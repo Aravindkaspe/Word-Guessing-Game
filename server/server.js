@@ -205,7 +205,7 @@ function getRandomWord(difficulty) {
 function startRound(roomID) {
     if (rooms[roomID]) {
 
-        if (rooms[roomID].roundNumber >= 3) {
+        if (rooms[roomID].roundNumber >= 10) {
             const finalScores = Object.values(rooms[roomID].players).map(player => ({
                 name: player.name,
                 score: player.score

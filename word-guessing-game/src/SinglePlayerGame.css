@@ -1,6 +1,6 @@
 /* SinglePlayerGame.css */
 
-.game-container {
+.game-containers {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -11,7 +11,6 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     overflow: hidden;
     position: relative;
-    padding-left: 15%;
   }
   
   .background-letters {

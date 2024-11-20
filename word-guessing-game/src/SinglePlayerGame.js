@@ -103,7 +103,7 @@ function SinglePlayerGame({ difficulty, userName, onRepeat, onQuit }) {
   };
 
   return (
-    <div className="game-container">
+    <div className="game-containers">
       <h1 className="game-title">Word Guessing Challenge</h1>
 
       <div className="score-timer">
